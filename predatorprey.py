@@ -49,7 +49,8 @@ def rk4solver(f,X0,t,parameters):
 
 if __name__ == '__main__':
     X0 = [0.4,0.4]
-    t = np.linspace(0,50,501)
+    t = np.linspace(0,500,5001)
+    equaltime = []
 
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
@@ -57,8 +58,12 @@ if __name__ == '__main__':
     parameters = [1,0.26,0.1]
 
     plot_array = rk4solver(odefuncPP,X0,t,parameters)
+    for i in plot_array:
+        if abs(i[0] - i[1]) < 0.0001 :
+            equaltime=
 
 
+    print(equaltime)
     ax.plot(t,plot_array[:,0])
     ax.plot(t,plot_array[:,1])
     plt.show()

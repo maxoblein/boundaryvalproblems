@@ -2,6 +2,14 @@ import sys
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
 import numpy as np
+from decimal import Decimal
+
+def finddp(num):
+    d = Decimal(num)
+    d1 = d.as_tuple().exponent
+    d2 = -1 * d1
+    return d2
+
 def odefuncPP(X,t,parameters):
     a = parameters[0]
     b = parameters[1]
@@ -25,25 +33,28 @@ def rk4(f,X1,t1,t2,parameters):
 
 def rk4solver(f,X0,t,parameters):
     #decide on a step size
-    h = 0.1
+    h =  t[-1]/(np.size(t)-1)
     t1 = t[0]
     rk4_plot = np.array(X0)
     X_rk4 = X0
     #check that rk4 does not go pat the tend specified
-    while t1 <= t[-1]:
+    while t1 < t[-1]:
         tnext = min(t[-1],t1+h)
         X_rk4 = rk4(f,X_rk4,t1,tnext,parameters)
         rk4_plot = np.vstack((rk4_plot,X_rk4))
         t1 = t1+h
+        t1 =round(t1,1)
+
     return rk4_plot
 
 if __name__ == '__main__':
     X0 = [0.4,0.5]
-    t = np.linspace(0,5)
-    parameters = [1,0.1,0.3]
+    t = np.linspace(0,5,51)
+    parameters = [1,0.3,0.1]
     plot_array = rk4solver(odefuncPP,X0,t,parameters)
-    print(plot_array[:-2])
+    #print(plot_array[:])
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
-    print(np.size(t))
-    print(np.size(plot_array[:-2,0]))
+    ax.plot(t,plot_array[:,0])
+    ax.plot(t,plot_array[:,1])
+    plt.show()

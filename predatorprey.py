@@ -48,13 +48,17 @@ def rk4solver(f,X0,t,parameters):
     return rk4_plot
 
 if __name__ == '__main__':
-    X0 = [0.4,0.5]
-    t = np.linspace(0,5,51)
-    parameters = [1,0.3,0.1]
-    plot_array = rk4solver(odefuncPP,X0,t,parameters)
-    #print(plot_array[:])
+    X0 = [0.4,0.4]
+    t = np.linspace(0,50,501)
+
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
+
+    parameters = [1,0.26,0.1]
+
+    plot_array = rk4solver(odefuncPP,X0,t,parameters)
+
+
     ax.plot(t,plot_array[:,0])
     ax.plot(t,plot_array[:,1])
     plt.show()

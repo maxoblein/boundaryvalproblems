@@ -27,13 +27,13 @@ def rk4solver(f,X0,t,parameters):
     #decide on a step size
     h = 0.1
     t1 = t[0]
-    rk4_plot = []
+    rk4_plot = np.array(X0)
     X_rk4 = X0
     #check that rk4 does not go pat the tend specified
     while t1 <= t[-1]:
         tnext = min(t[-1],t1+h)
         X_rk4 = rk4(f,X_rk4,t1,tnext,parameters)
-        print(np.size(X_rk4))
+        rk4_plot = np.vstack((rk4_plot,X_rk4))
         t1 = t1+h
     return rk4_plot
 
@@ -42,7 +42,8 @@ if __name__ == '__main__':
     t = np.linspace(0,5)
     parameters = [1,0.1,0.3]
     plot_array = rk4solver(odefuncPP,X0,t,parameters)
-    '''fig = plt.figure()
+    print(plot_array[:-2])
+    fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
-    ax.plot(t,rk4solver(odefuncPP,X0,t,parameters))
-    plt.show()'''
+    print(np.size(t))
+    print(np.size(plot_array[:-2,0]))

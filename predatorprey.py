@@ -1,14 +1,10 @@
 import sys
 from scipy.integrate import ode
+import scipy.signal as signal
 import matplotlib.pyplot as plt
 import numpy as np
 from decimal import Decimal
 
-def finddp(num):
-    d = Decimal(num)
-    d1 = d.as_tuple().exponent
-    d2 = -1 * d1
-    return d2
 
 def odefuncPP(X,t,parameters):
     a = parameters[0]
@@ -58,12 +54,11 @@ if __name__ == '__main__':
     parameters = [1,0.26,0.1]
 
     plot_array = rk4solver(odefuncPP,X0,t,parameters)
-    for i in plot_array:
-        if abs(i[0] - i[1]) < 0.0001 :
-            equaltime=
 
-
-    print(equaltime)
+    peak_array = signal.find_peaks(plot_array[:,0])
+    
+    print(peak_array)
+    print(period)
     ax.plot(t,plot_array[:,0])
     ax.plot(t,plot_array[:,1])
     plt.show()

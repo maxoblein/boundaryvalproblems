@@ -43,6 +43,23 @@ def rk4solver(f,X0,t,parameters):
 
     return rk4_plot
 
+def find_period(sol_array):
+    peak_array, properties = signal.find_peaks(sol_array[:,0])
+
+    peak_times = []
+
+    for i in peak_array:
+        peak_times.append(t[i])
+
+
+    periods = []
+
+    for j in range(1,len(peak_times)):
+        periods.append(peak_times[j] - peak_times[j-1])
+
+    period_array = np.array(periods)
+    return np.mean(period_array)
+
 if __name__ == '__main__':
     X0 = [0.4,0.4]
     t = np.linspace(0,500,5001)
@@ -55,9 +72,7 @@ if __name__ == '__main__':
 
     plot_array = rk4solver(odefuncPP,X0,t,parameters)
 
-    peak_array = signal.find_peaks(plot_array[:,0])
-    
-    print(peak_array)
+    period = find_period(plot_array)
     print(period)
     ax.plot(t,plot_array[:,0])
     ax.plot(t,plot_array[:,1])

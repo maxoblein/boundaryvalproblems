@@ -61,7 +61,7 @@ def find_period(sol_array):
     return np.mean(period_array)
 
 if __name__ == '__main__':
-    X0 = [0.4,0.4]
+    #X0 = [0.3,0.3]
     t = np.linspace(0,500,5001)
     equaltime = []
 
@@ -69,11 +69,40 @@ if __name__ == '__main__':
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
 
     parameters = [1,0.26,0.1]
+    mean_x_diff = []
+    mean_y_diff = []
+    X0_guess = np.linspace(0.25,0.4)
+    for i in X0_guess:
+        X0 = [i,i]
+        plot_array = rk4solver(odefuncPP,X0,t,parameters)
+        peak_array_x, properties = signal.find_peaks(plot_array[:,0])
+        peak_array_y, properties = signal.find_peaks(plot_array[:,0])
+        x_peaks = []
+        y_peaks = []
+        for j in peak_array_x:
+            x_peaks.append(plot_array[j,0])
 
-    plot_array = rk4solver(odefuncPP,X0,t,parameters)
+        for k in peak_array_y:
+            y_peaks.append(plot_array[k,1])
 
-    period = find_period(plot_array)
-    print(period)
-    ax.plot(t,plot_array[:,0])
-    ax.plot(t,plot_array[:,1])
+        period = find_period(plot_array)
+
+        x_diff = []
+        y_diff = []
+        for m in range(1,len(x_peaks)):
+            x_diff.append(x_peaks[m] - x_peaks[m-1])
+
+        for n in range(1,len(y_peaks)):
+            y_diff.append(y_peaks[n]-y_peaks[n-1])
+
+        x_diff_array = np.array(x_diff)
+        y_diff_array = np.array(y_diff)
+        mean_x_diff.append(np.mean(x_diff_array))
+        mean_y_diff.append(np.mean(y_diff_array))
+
+
+    ax.plot(X0_guess,mean_x_diff,label = 'xdiff')
+    ax.plot(X0_guess,mean_y_diff,label = 'ydiff')
+    ax.legend()
+    ax.hlines(0,0.25,0.4)
     plt.show()

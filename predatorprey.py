@@ -1,12 +1,14 @@
 import sys
 from scipy.integrate import ode
 import scipy.signal as signal
+from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 import numpy as np
 from decimal import Decimal
 
 
 def odefuncPP(X,t,parameters):
+    X.tolist()
     a = parameters[0]
     b = parameters[1]
     d = parameters[2]
@@ -60,15 +62,19 @@ def find_period(sol_array):
     period_array = np.array(periods)
     return np.mean(period_array)
 
-if __name__ == '__main__':
-    #X0 = [0.3,0.3]
-    t = np.linspace(0,500,5001)
-    equaltime = []
+def sol_after_period(X0,f,t,parameters):
+    sol_array = rk4solver(odefuncPP,X0,t,parameters)
+    period = find_period(sol_array)
+    index_of_period = np.argwhere(abs(t-period)<= 0.05)
+    print(index_of_period)
+    index_of_period = index_of_period[0,0]
 
-    fig = plt.figure()
-    ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
+    return sol_array[index_of_period,:]
 
-    parameters = [1,0.26,0.1]
+def roots(X0,XT):
+    return abs(X0-XT)
+
+def plot_peaks(t,parameters):
     mean_x_diff = []
     mean_y_diff = []
     X0_guess = np.linspace(0.25,0.4)
@@ -106,3 +112,16 @@ if __name__ == '__main__':
     ax.legend()
     ax.hlines(0,0.25,0.4)
     plt.show()
+
+if __name__ == '__main__':
+    #X0 = [0.3,0.3]
+    t = np.linspace(0,500,5001)
+    equaltime = []
+
+    fig = plt.figure()
+    ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
+
+    parameters = [1,0.26,0.1]
+    X0 = np.array([0.4,0.4])
+    print(sol_after_period(X0,odefuncPP,t,parameters))
+    

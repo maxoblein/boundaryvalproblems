@@ -66,13 +66,11 @@ def sol_after_period(X0,f,t,parameters):
     sol_array = rk4solver(odefuncPP,X0,t,parameters)
     period = find_period(sol_array)
     index_of_period = np.argwhere(abs(t-period)<= 0.05)
-    print(index_of_period)
     index_of_period = index_of_period[0,0]
 
-    return sol_array[index_of_period,:]
+    return abs(X0-sol_array[index_of_period,:])
 
-def roots(X0,XT):
-    return abs(X0-XT)
+
 
 def plot_peaks(t,parameters):
     mean_x_diff = []
@@ -124,4 +122,12 @@ if __name__ == '__main__':
     parameters = [1,0.26,0.1]
     X0 = np.array([0.4,0.4])
     print(sol_after_period(X0,odefuncPP,t,parameters))
-    
+    solution = fsolve(sol_after_period,X0,(odefuncPP,t,parameters))
+    print(solution)
+
+    plot_array = rk4solver(odefuncPP,solution,t,parameters)
+    ax.plot(t,plot_array[:,0])
+    ax.plot(t,plot_array[:,1])
+    ax.hlines(solution[0],0,500)
+    ax.hlines(solution[1],0,500)
+    plt.show()

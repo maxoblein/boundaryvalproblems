@@ -63,16 +63,25 @@ def find_period(sol_array):
     return np.mean(period_array)
 
 def sol_after_period(X0,f,t,parameters):
-    sol_array = rk4solver(odefuncPP,X0,t,parameters)
+    sol_array = rk4solver(f,X0,t,parameters)
     period = find_period(sol_array)
     index_of_period = np.argwhere(abs(t-period)< 0.05)
     if np.size(index_of_period) != 1:
         return [0,0]
     index_of_period = index_of_period[0,0]
 
-
     return abs(X0-sol_array[index_of_period,:])
 
+def sol_after_given_period(X0_T,f,t,parameters):
+    X0 = X0_T[0:2]
+    period = X0_T[2]
+    sol_array = rk4solver(f,X0,t,parameters)
+    index_of_period = np.argwhere(abs(t-period)< 0.05)
+    if np.size(index_of_period) != 1:
+        return [0,0]
+    index_of_period = index_of_period[0,0]
+
+    return sol_array[index_of_period,:]
 
 
 def plot_peaks(t,parameters):
@@ -114,15 +123,9 @@ def plot_peaks(t,parameters):
     ax.hlines(0,0.25,0.4)
     plt.show()
 
-if __name__ == '__main__':
-    #X0 = [0.3,0.3]
-    t = np.linspace(0,50,501)
-
+def optimal_start(X0,t,parameters):
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
-
-    parameters = [1,0.26,0.1]
-    X0 = np.array([0.4,0.4])
     solution = fsolve(sol_after_period,X0,(odefuncPP,t,parameters))
     print(solution)
 
@@ -132,4 +135,31 @@ if __name__ == '__main__':
     ax.hlines(solution[0],0,50)
     ax.hlines(solution[1],0,50)
     ax.vlines(18,0.25,0.35)
+    plt.show()
+
+def phase_condition(X0_T,f,t,parameters):
+    phi = np.zeros([3,1])
+    phi[0,0] = X0_T[0] - 0.32
+    phi[1,0] = (X0_T[0:2] - sol_after_given_period(X0_T,f,t,parameters))[0]
+    phi[2,0] = (X0_T[0:2] - sol_after_given_period(X0_T,f,t,parameters))[1]
+    phi = phi.flatten()
+    return phi
+
+if __name__ == '__main__':
+    #X0 = [0.3,0.3]
+    t = np.linspace(0,50,501)
+
+    fig = plt.figure()
+    ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
+
+    parameters = [1,0.26,0.1]
+    X0_T = np.array([0.4,0.4,18])
+    solution = fsolve(phase_condition,X0_T,(odefuncPP,t,parameters))
+    print(solution)
+    plot_array = rk4solver(odefuncPP,solution[0:2],t,parameters)
+    ax.plot(t,plot_array[:,0])
+    ax.plot(t,plot_array[:,1])
+    ax.hlines(solution[0],0,50)
+    ax.hlines(solution[1],0,50)
+    ax.vlines(solution[2],0.2,0.4)
     plt.show()

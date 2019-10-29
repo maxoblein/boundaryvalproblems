@@ -8,6 +8,10 @@ from decimal import Decimal
 
 
 def odefuncPP(X,t,parameters):
+    '''
+        function to implement ode for predator prey system
+
+    '''
     X.tolist()
     a = parameters[0]
     b = parameters[1]
@@ -20,6 +24,17 @@ def odefuncPP(X,t,parameters):
 # Function to implement one step of the runge kutter fourth order method
 # X1 is the x at start of step and X2 is the end with respective t1 and t2
 def rk4(f,X1,t1,t2,parameters):
+    '''
+    function to implement the runge kutta fourth order integrator
+
+    inputs: -f ode Function
+            -X1 approx solution at start of timestep
+            -t1,t2 start and end of timestep
+            -parameters for ode
+
+    output: -X2 approx solution after timestep
+
+    '''
 
     h = t2-t1
     k1 = h*f(X1,t1,parameters)
@@ -30,6 +45,17 @@ def rk4(f,X1,t1,t2,parameters):
     return X2
 
 def rk4solver(f,X0,t,parameters):
+    '''
+    function to implement rk4 over a time period
+
+    inputs: -f ode function
+            -X0 initial conditions
+            -t timeperiod
+            -parameters for ode
+
+    outputs: -the solutions after every timestep as an array
+
+    '''
     #decide on a step size
     h =  t[-1]/(np.size(t)-1)
     t1 = t[0]
@@ -46,6 +72,13 @@ def rk4solver(f,X0,t,parameters):
     return rk4_plot
 
 def find_period(sol_array):
+    '''
+    function to find the period of a given function
+
+    inputs: sol_array array of the solutions to the ode as found in integrator
+
+    outputs: the period of the given function
+    '''
     peak_array, properties = signal.find_peaks(sol_array[:,0])
 
     peak_times = []
@@ -63,6 +96,16 @@ def find_period(sol_array):
     return np.mean(period_array)
 
 def sol_after_period(X0,f,t,parameters):
+    '''
+    function to find value after a calculated time period
+
+    inputs: -X0 initial conditions
+            -f ode function
+            -t timespan
+            -parameters for ode
+
+    outputs: -difference between inital conditions and the value after time period
+    '''
     sol_array = rk4solver(f,X0,t,parameters)
     period = find_period(sol_array)
     index_of_period = np.argwhere(abs(t-period)< 0.05)
@@ -73,6 +116,18 @@ def sol_after_period(X0,f,t,parameters):
     return abs(X0-sol_array[index_of_period,:])
 
 def sol_after_given_period(X0_T,f,t,parameters):
+    '''given a set of initial conditions and a Time guessed to be the period
+    calculate the solution a this time
+
+    inputs: -X0_T array of initial guess conditions for x,y, and period
+            -f the function of the ode being analysed
+            -t timeperiod to be integrated through
+            -parameters of the ode
+
+    outputs: -return solution after time period
+
+    '''
+
     X0 = X0_T[0:2]
     period = X0_T[2]
     sol_array = rk4solver(f,X0,t,parameters)
@@ -84,46 +139,17 @@ def sol_after_given_period(X0_T,f,t,parameters):
     return sol_array[index_of_period,:]
 
 
-def plot_peaks(t,parameters):
-    mean_x_diff = []
-    mean_y_diff = []
-    X0_guess = np.linspace(0.25,0.4)
-    for i in X0_guess:
-        X0 = [i,i]
-        plot_array = rk4solver(odefuncPP,X0,t,parameters)
-        peak_array_x, properties = signal.find_peaks(plot_array[:,0])
-        peak_array_y, properties = signal.find_peaks(plot_array[:,0])
-        x_peaks = []
-        y_peaks = []
-        for j in peak_array_x:
-            x_peaks.append(plot_array[j,0])
-
-        for k in peak_array_y:
-            y_peaks.append(plot_array[k,1])
-
-        period = find_period(plot_array)
-
-        x_diff = []
-        y_diff = []
-        for m in range(1,len(x_peaks)):
-            x_diff.append(x_peaks[m] - x_peaks[m-1])
-
-        for n in range(1,len(y_peaks)):
-            y_diff.append(y_peaks[n]-y_peaks[n-1])
-
-        x_diff_array = np.array(x_diff)
-        y_diff_array = np.array(y_diff)
-        mean_x_diff.append(np.mean(x_diff_array))
-        mean_y_diff.append(np.mean(y_diff_array))
-
-
-    ax.plot(X0_guess,mean_x_diff,label = 'xdiff')
-    ax.plot(X0_guess,mean_y_diff,label = 'ydiff')
-    ax.legend()
-    ax.hlines(0,0.25,0.4)
-    plt.show()
 
 def optimal_start(X0,t,parameters):
+    '''
+    function to find optimal initial conditions after calculating a time period
+
+    inputs: -X0 initial conditions
+            - t timespan
+            -parameters for ode
+
+    outputs: -plots solution for optimal starting conditions
+    '''
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
     solution = fsolve(sol_after_period,X0,(odefuncPP,t,parameters))
@@ -138,6 +164,16 @@ def optimal_start(X0,t,parameters):
     plt.show()
 
 def phase_condition(X0_T,f,t,parameters):
+    '''
+    function that implements the constraints on the ode
+
+    inputs: -X0_T array of initial conditions and guess at period
+            -f ode Function
+            -t timespan
+            -parameters for ode
+
+    outputs: -phi constraints to be made to zero
+    '''
     phi = np.zeros([3,1])
     phi[0,0] = X0_T[0] - 0.32
     phi[1,0] = (X0_T[0:2] - sol_after_given_period(X0_T,f,t,parameters))[0]

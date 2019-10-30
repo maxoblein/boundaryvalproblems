@@ -13,17 +13,19 @@ def odefuncPP(X,t,a,b,d):
 
     '''
     X.tolist()
-    '''a = parameters[0]
-    b = parameters[1]
-    d = parameters[2]'''
     dx = X[0]*(1-X[0]) - ((a*X[0]*X[1])/(d+X[0]))
     dy = b * X[1] * (1 - (X[1]/X[0]))
     dXdt = [dx,dy]
     return np.array(dXdt)
 
-
-
-
+'''def odefuncHOPF(X,t,alpha,beta):
+    ''''''
+        function to implement the ode for the hopf bifurcation
+    ''''''
+    du1 = beta*X[0] - X[1] + alpha*X[0]*((X[0]**2) + (X[1]**2))
+    du2 = X[0] + beta*X[1] + alpha*X[1]*((X[0]**2) + (X[1]**2))
+    dXdt = [du1,du2]
+    return np.array(dXdt)'''
 
 
 def sol_after_given_period(X0_T,f,t,parameters):
@@ -49,11 +51,10 @@ def sol_after_given_period(X0_T,f,t,parameters):
 
     return sol_array[index_of_period,:]
 
+def phaseconditionPP(X0_T):
+    return X0_T[0] - 0.32
 
-
-
-
-def phase_condition(X0_T,f,t,parameters):
+def constraints(X0_T,f,phasecondition,t,parameters):
     '''
     function that implements the constraints on the ode
 
@@ -65,7 +66,7 @@ def phase_condition(X0_T,f,t,parameters):
     outputs: -phi constraints to be made to zero
     '''
     phi = np.zeros([3,1])
-    phi[2,0] = X0_T[0] - 0.32
+    phi[2,0] = phasecondition(X0_T)
     phi[0,0] = (X0_T[0:2] - sol_after_given_period(X0_T,f,t,parameters))[0]
     phi[1,0] = (X0_T[0:2] - sol_after_given_period(X0_T,f,t,parameters))[1]
     phi = phi.flatten()
@@ -73,16 +74,17 @@ def phase_condition(X0_T,f,t,parameters):
 
 if __name__ == '__main__':
     #X0 = [0.3,0.3]
-    t = np.linspace(0,500,5001)
+    t = np.linspace(0,50,501)
 
     fig = plt.figure()
     ax = fig.add_axes([0.20, 0.20, 0.70, 0.70])
 
     parameters = (1,0.26,0.1)
     X0_T = np.array([0.32,0.28,20])
-    solution = fsolve(phase_condition,X0_T,(odefuncPP,t,parameters))
+    solution = fsolve(constraints,X0_T,(odefuncPP,phaseconditionPP,t,parameters))
     print(solution)
-    plot_array = odeint(odefuncPP,solution[0:2],t,args = parameters)
+    solution[0:2]
+    plot_array = odeint(odefuncPP,X0_T[0:2],t,args = parameters)
     ax.plot(t,plot_array[:,0])
     ax.plot(t,plot_array[:,1])
     ax.hlines(solution[0],0,50)

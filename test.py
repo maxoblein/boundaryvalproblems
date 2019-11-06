@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-from numericalshooting import sol_after_given_period, constraints, shooting
+from numericalshooting import *
 
 def odefuncHOPF(X,t,alpha,beta):
     '''

@@ -36,18 +36,23 @@ def HOPFanalytic(beta,t):
     u2 = np.sqrt(beta) * np.sin(t)
     return[u1,u2]
 #shooting(odefunc,phasecond,parameters,X0_T)
-parameters = (-1,0.1)
-X0_T = [0.3,0,6.28]
-solution = shooting(odefuncHOPF,phaseconditionHOPF,parameters,X0_T)
-print(solution)
-print(HOPFanalytic(parameters[1],solution[2]))
-t = np.linspace(0,solution[2])
+if __name__ == '__main__':
 
-plot_array = odeint(odefuncHOPF,solution[0:2],t, args = parameters)
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(t,plot_array[:,0])
-ax.plot(t,plot_array[:,1])
-ax.hlines(solution[0],0,solution[2])
-ax.hlines(solution[1],0,solution[2])
-plt.show()
+    parameters = (-1,0.1)
+    X0_T = [0.3,0,6.28]
+    solution = shooting(odefuncHOPF,phaseconditionHOPF,parameters,X0_T)
+    analytic_sol = HOPFanalytic(parameters[1],solution[2])
+    if np.isclose(solution[0:-1],analytic_sol,atol = 1e-5).all() == True:
+        print('Test passed')
+    else:
+        print('Test failed')
+    '''t = np.linspace(0,solution[2])
+
+    plot_array = odeint(odefuncHOPF,solution[0:2],t, args = parameters)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(t,plot_array[:,0])
+    ax.plot(t,plot_array[:,1])
+    ax.hlines(solution[0],0,solution[2])
+    ax.hlines(solution[1],0,solution[2])
+    plt.show()'''

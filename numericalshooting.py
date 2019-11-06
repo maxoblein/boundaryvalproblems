@@ -39,9 +39,9 @@ def constraints(X0_T,f,phasecondition,parameters):
 
     outputs: -phi constraints to be made to zero
     '''
-    phi = np.zeros([np.size(X0_T)-1,1])
 
-    phi[:,0] = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
+
+    phi = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
     phi = phi.flatten()
     phi = np.hstack((phi,phasecondition(X0_T,parameters)))
 

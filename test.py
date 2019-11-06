@@ -31,11 +31,18 @@ def phaseconditionHOPF(X0_T,parameters):
     X = X0_T[0:2]
     return beta*X[0] - X[1] + alpha*X[0]*((X[0]**2) + (X[1]**2))
 
+def HOPFanalytic(beta,t):
+    u1 = np.sqrt(beta) * np.cos(t)
+    u2 = np.sqrt(beta) * np.sin(t)
+    return[u1,u2]
 #shooting(odefunc,phasecond,parameters,X0_T)
-solution = shooting(odefuncHOPF,phaseconditionHOPF,(-1,0.8),[0.32,0.2,10])
+parameters = (-1,0.1)
+X0_T = [0.3,0,6.28]
+solution = shooting(odefuncHOPF,phaseconditionHOPF,parameters,X0_T)
 print(solution)
+print(HOPFanalytic(parameters[1],solution[2]))
 t = np.linspace(0,solution[2])
-parameters = (-1,0.8)
+
 plot_array = odeint(odefuncHOPF,solution[0:2],t, args = parameters)
 fig = plt.figure()
 ax = fig.add_subplot(111)

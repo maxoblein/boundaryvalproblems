@@ -56,3 +56,5 @@ if __name__ == '__main__':
     ax.hlines(solution[0],0,solution[2])
     ax.hlines(solution[1],0,solution[2])
     plt.show()'''
+    params = [-1,[0,2]]
+    pseudo_continuation(X0_T,params,odefuncHOPF,phaseconditionHOPF,1)

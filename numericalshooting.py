@@ -46,7 +46,25 @@ def constraints(X0_T,f,phasecondition,parameters):
     phi = np.hstack((phi,phasecondition(X0_T,parameters)))
 
     return phi
+'''
+def constraints_cont(V,f,phasecondition,parameters):'''
+
 
 def shooting(odefunc,phasecond,parameters,X0_T):
     solution = fsolve(constraints,X0_T,(odefunc,phasecond,parameters))
     return(solution)
+
+def pseudo_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01):
+    param_span = params[vary_param]
+    print(param_span)
+    delta = (param_span[1] - param_span[0])/100
+    params[vary_param] = param_span[0]
+    params_t = tuple(params)
+    u1 = shooting(odefunc,phasecond,params_t,u0)
+    p0 = params
+    p1 = params
+    p1[vary_param] += delta
+
+    dv = [u1-u0,p1-p0]
+    v2_tilde = [u1,p1] + delta*dv
+    print(v2_tilde)

@@ -42,12 +42,18 @@ def constraints(X0_T,f,phasecondition,parameters):
 
 
     phi = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
-    phi = phi.flatten()
+
     phi = np.hstack((phi,phasecondition(X0_T,parameters)))
 
     return phi
-'''
-def constraints_cont(V,f,phasecondition,parameters):'''
+
+def constraints_cont(v,f,phasecondition,params,dv,v_tilde,vary_param=0):
+    params = np.insert(params,vary_param,v[-1])
+    params = tuple(params)
+    phi = v[:-2] - sol_after_given_period(v[:-1],f,params)
+    phi = np.hstack((phi,phasecondition(v[:-1],params)))
+    phi = np.hstack((phi,np.dot(v-v_tilde,dv)))
+    return phi
 
 
 def shooting(odefunc,phasecond,parameters,X0_T):
@@ -56,15 +62,29 @@ def shooting(odefunc,phasecond,parameters,X0_T):
 
 def pseudo_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01):
     param_span = params[vary_param]
-    print(param_span)
     delta = (param_span[1] - param_span[0])/100
-    params[vary_param] = param_span[0]
-    params_t = tuple(params)
-    u1 = shooting(odefunc,phasecond,params_t,u0)
-    p0 = params
-    p1 = params
-    p1[vary_param] += delta
-
-    dv = [u1-u0,p1-p0]
-    v2_tilde = [u1,p1] + delta*dv
-    print(v2_tilde)
+    p0 = param_span[0]
+    p1 = p0
+    params = np.delete(params,vary_param)
+    param_list = []
+    plot_list = []
+    while p1 <=2:
+        params = np.insert(params,vary_param,p0)
+        param_list.append(p0)
+        tspan = np.linspace(0,u0[-1])
+        plot_list.append(np.max(odeint(odefunc,u0[:-1],tspan,args = tuple(params))))
+        u1 = shooting(odefunc,phasecond,tuple(params),u0)
+        p1 = p0 + delta
+        params = np.delete(params,vary_param)
+        v0 = np.hstack((u0,p0))
+        v1 = np.hstack((u1,p1))
+        dv = v1-v0
+        v2_tilde = v1 + delta*dv
+        solution = fsolve(constraints_cont,v2_tilde,args = (odefunc,phasecond,params,dv,v2_tilde,1))
+        print(solution)
+        u0 = u1
+        p0 = p1
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(param_list,plot_list)
+    plt.show()

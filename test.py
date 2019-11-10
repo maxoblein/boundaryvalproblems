@@ -29,6 +29,9 @@ def odefuncPP(X,t,a,b,d):
     dXdt = [dx,dy]
     return np.array(dXdt)
 
+def cubic(X,c):
+    return  X**3 - X + c
+
 def phaseconditionPP(X0_T,parameters):
     return X0_T[0] - 0.32
 

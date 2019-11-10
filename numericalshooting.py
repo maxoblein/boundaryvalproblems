@@ -28,6 +28,7 @@ def sol_after_given_period(X0_T,f,parameters):
     return sol_array[-1,:]
 
 
+
 def constraints(X0_T,f,phasecondition,parameters):
     '''
     function that implements the constraints on the ode

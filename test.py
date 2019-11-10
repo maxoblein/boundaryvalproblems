@@ -58,6 +58,6 @@ if __name__ == '__main__':
     else:
         print('Test failed')
 
-    print(shooting(odefuncHOPFMOD,phaseconditionHOPFMOD,(-1,-0.82),[0,0,6.2]))
+
     params = np.array([-1,[2,0]])
     natural_continuation([0.3,0,6.2],params,odefuncHOPF,phaseconditionHOPF,1)

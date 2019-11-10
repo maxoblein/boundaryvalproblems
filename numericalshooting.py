@@ -60,6 +60,32 @@ def shooting(odefunc,phasecond,parameters,X0_T):
     solution = fsolve(constraints,X0_T,(odefunc,phasecond,parameters))
     return(solution)
 
+def natural_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01):
+    pspan = params[vary_param]
+    print(pspan)
+    delta = (pspan[1] - pspan[0])/100
+    p0 = pspan[0]
+    params[vary_param] = p0
+    u0_tilde = u0
+    param_list = []
+    plot_list = []
+    for i in range(100):
+        u0 = shooting(odefunc,phasecond,tuple(params),u0_tilde)
+        tspan = np.linspace(0,u0_tilde[-1])
+        sol_array = odeint(odefunc,u0_tilde[:-1],tspan,args = tuple(params))
+        mag_list = []
+        for i in sol_array:
+            mag_list.append(np.linalg.norm(i))
+        plot_list.append(max(mag_list))
+        param_list.append(params[vary_param])
+
+        u0_tilde = np.copy(u0)
+        params[vary_param] += delta
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(param_list,plot_list)
+    plt.show()
+
 def pseudo_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01):
     param_span = params[vary_param]
     delta = (param_span[1] - param_span[0])/100
@@ -80,8 +106,9 @@ def pseudo_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01)
         v1 = np.hstack((u1,p1))
         dv = v1-v0
         v2_tilde = v1 + delta*dv
+        print(v2_tilde)
         solution = fsolve(constraints_cont,v2_tilde,args = (odefunc,phasecond,params,dv,v2_tilde,1))
-        print(solution)
+
         u0 = u1
         p0 = p1
     fig = plt.figure()

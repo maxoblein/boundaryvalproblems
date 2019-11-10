@@ -28,8 +28,7 @@ def sol_after_given_period(X0_T,f,parameters):
     return sol_array[-1,:]
 
 
-
-def constraints(X0_T,f,phasecondition,parameters):
+def constraints(X0_T,f,parameters):
     '''
     function that implements the constraints on the ode
 
@@ -43,8 +42,9 @@ def constraints(X0_T,f,phasecondition,parameters):
 
 
     phi = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
+    t = 0
 
-    phi = np.hstack((phi,phasecondition(X0_T,parameters)))
+    phi = np.hstack((phi,f(X0_T,t,*parameters)[0]))
 
     return phi
 
@@ -57,11 +57,11 @@ def constraints_cont(v,f,phasecondition,params,dv,v_tilde,vary_param=0):
     return phi
 
 
-def shooting(odefunc,phasecond,parameters,X0_T):
-    solution = fsolve(constraints,X0_T,(odefunc,phasecond,parameters))
+def shooting(odefunc,parameters,X0_T):
+    solution = fsolve(constraints,X0_T,(odefunc,parameters))
     return(solution)
 
-def natural_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01,discretisation = lambda odefunc,phasecond,parameters,X0_T : X0_T ):
+def natural_continuation(u0,params,odefunc,vary_param = 0,delta = 0.01,discretisation = lambda odefunc,phasecond,parameters,X0_T : X0_T ):
     pspan = params[vary_param]
     delta = (pspan[1] - pspan[0])/100
     p0 = pspan[0]
@@ -70,7 +70,7 @@ def natural_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01
     param_list = []
     plot_list = []
     for i in range(100):
-        u0 = discretisation(odefunc,phasecond,tuple(params),u0_tilde)
+        u0 = discretisation(odefunc,tuple(params),u0_tilde)
         tspan = np.linspace(0,u0_tilde[-1])
         sol_array = odeint(odefunc,u0_tilde[:-1],tspan,args = tuple(params))
         mag_list = []

@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     parameters = (-1,0.1)
     X0_T = [0.3,0,6.28]
-    solution = shooting(odefuncHOPF,phaseconditionHOPF,parameters,X0_T)
+    solution = shooting(odefuncHOPF,parameters,X0_T)
     analytic_sol = HOPFanalytic(parameters[1],solution[2])
     if np.isclose(solution[0:-1],analytic_sol,atol = 1e-5).all() == True:
         print('Test passed')
@@ -63,4 +63,4 @@ if __name__ == '__main__':
 
 
     params = np.array([-1,[2,0]])
-    natural_continuation([0.3,0,6.2],params,odefuncHOPF,phaseconditionHOPF,1)
+    natural_continuation([0.3,0,6.2],params,odefuncHOPF,1,discretisation = shooting)

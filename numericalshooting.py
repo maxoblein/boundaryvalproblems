@@ -44,7 +44,7 @@ def constraints(X0_T,f,parameters):
     phi = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
     t = 0
 
-    phi = np.hstack((phi,f(X0_T,t,*parameters)[0]))
+    phi = np.hstack((phi,f(X0_T[:-1],t,*parameters)[0]))
 
     return phi
 

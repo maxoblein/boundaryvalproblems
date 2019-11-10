@@ -61,11 +61,12 @@ def shooting(odefunc,parameters,X0_T):
     solution = fsolve(constraints,X0_T,(odefunc,parameters))
     return(solution)
 
-def natural_continuation(u0,params,odefunc,vary_param = 0,delta = 0.01,discretisation = lambda odefunc,phasecond,parameters,X0_T : X0_T ):
+def natural_continuation(u0,params,odefunc,vary_param = 0,discretisation = lambda odefunc,parameters,X0_T : X0_T ):
     pspan = params[vary_param]
     delta = (pspan[1] - pspan[0])/100
     p0 = pspan[0]
-    params[vary_param] = p0
+    params = np.delete(params,vary_param)
+    params = np.insert(params,vary_param,p0)
     u0_tilde = u0
     param_list = []
     plot_list = []

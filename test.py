@@ -29,7 +29,7 @@ def odefuncPP(X,t,a,b,d):
     dXdt = [dx,dy]
     return np.array(dXdt)
 
-def cubic(X,c):
+def cubic(X,t,c):
     return  X**3 - X + c
 
 def phaseconditionPP(X0_T,parameters):
@@ -63,4 +63,4 @@ if __name__ == '__main__':
 
 
     params = np.array([-1,[2,0]])
-    natural_continuation([0.3,0,6.2],params,odefuncHOPF,1,discretisation = shooting)
+    natural_continuation([0.3,0,6.2],params,odefuncHOPF,vary_param=1)

@@ -62,5 +62,6 @@ if __name__ == '__main__':
         print('Test failed')
 
 
-    params = np.array([-1,[2,0]])
-    natural_continuation([0.3,0,6.2],params,odefuncHOPF,vary_param=1)
+    params = np.array([-1,[2,-1]])
+    #natural_continuation([0.3,0,6.3],params,odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)
+    pseudo_continuation([0.3,0,6.3],params,odefuncHOPFMOD,vary_param=1,discretisation = shooting)

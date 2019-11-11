@@ -48,11 +48,10 @@ def constraints(X0_T,f,parameters):
 
     return phi
 
-def constraints_cont(v,f,phasecondition,params,dv,v_tilde,vary_param=0):
-    params = np.insert(params,vary_param,v[-1])
-    params = tuple(params)
+def constraints_cont(v,f,params,dv,v_tilde):
     phi = v[:-2] - sol_after_given_period(v[:-1],f,params)
-    phi = np.hstack((phi,phasecondition(v[:-1],params)))
+    t = 0
+    phi = np.hstack((phi,f(v[:-2],t,*params)[0]))
     phi = np.hstack((phi,np.dot(v-v_tilde,dv)))
     return phi
 
@@ -61,16 +60,17 @@ def shooting(odefunc,parameters,X0_T):
     solution = fsolve(constraints,X0_T,(odefunc,parameters))
     return(solution)
 
-def natural_continuation(u0,params,odefunc,vary_param = 0,discretisation = lambda odefunc,parameters,X0_T : X0_T ):
+def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):
     pspan = params[vary_param]
-    delta = (pspan[1] - pspan[0])/100
+    delta = (pspan[1] - pspan[0])/steps
     p0 = pspan[0]
     params = np.delete(params,vary_param)
     params = np.insert(params,vary_param,p0)
     u0_tilde = u0
     param_list = []
     plot_list = []
-    for i in range(100):
+    sol_list = []
+    for i in range(steps):
         u0 = discretisation(odefunc,tuple(params),u0_tilde)
         tspan = np.linspace(0,u0_tilde[-1])
         sol_array = odeint(odefunc,u0_tilde[:-1],tspan,args = tuple(params))
@@ -79,40 +79,49 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,discretisation = lambd
             mag_list.append(np.linalg.norm(i))
         plot_list.append(max(mag_list))
         param_list.append(params[vary_param])
-
+        sol_list.append(u0)
         u0_tilde = np.copy(u0)
         params[vary_param] += delta
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(param_list,plot_list)
-    plt.show()
+    if plot == True:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(param_list,plot_list)
+        plt.show()
+    return np.array(param_list), np.array(sol_list)
 
-def pseudo_continuation(u0,params,odefunc,phasecond,vary_param = 0,delta = 0.01):
-    param_span = params[vary_param]
-    delta = (param_span[1] - param_span[0])/100
-    p0 = param_span[0]
-    p1 = p0
+def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False):
+    pspan = params[vary_param]
+    delta = (pspan[1] - pspan[0])/steps
+    p0 = pspan[0]
     params = np.delete(params,vary_param)
+    params = np.insert(params,vary_param,p0)
+    u0 = discretisation(odefunc,tuple(params),u0)
+    p1 = p0 + delta
+    params = np.delete(params,vary_param)
+    params = np.insert(params,vary_param,p1)
+    u1 = discretisation(odefunc,tuple(params),u0)
+    v0 = np.hstack((u0,p0))
+    v1 = np.hstack((u1,p1))
     param_list = []
     plot_list = []
-    while p1 <=2:
-        params = np.insert(params,vary_param,p0)
-        param_list.append(p0)
-        tspan = np.linspace(0,u0[-1])
-        plot_list.append(np.max(odeint(odefunc,u0[:-1],tspan,args = tuple(params))))
-        u1 = shooting(odefunc,phasecond,tuple(params),u0)
-        p1 = p0 + delta
+    sol_list = [v0,v1]
+    for i in range(steps):
+        dv = v1 - v0
+        v2_tilde = v1 + dv
         params = np.delete(params,vary_param)
-        v0 = np.hstack((u0,p0))
-        v1 = np.hstack((u1,p1))
-        dv = v1-v0
-        v2_tilde = v1 + delta*dv
-        print(v2_tilde)
-        solution = fsolve(constraints_cont,v2_tilde,args = (odefunc,phasecond,params,dv,v2_tilde,1))
-
-        u0 = u1
-        p0 = p1
-    fig = plt.figure()
+        params = np. insert(params,vary_param,v1[-1])
+        tspan = np.linspace(0,v1[-2])
+        sol_array = odeint(odefunc,v1[:-2],tspan,args = tuple(params))
+        mag_list = []
+        for i in sol_array:
+            mag_list.append(np.linalg.norm(i))
+        plot_list.append(max(mag_list))
+        param_list.append(params[vary_param])
+        v2 = fsolve(constraints_cont,v2_tilde,(odefunc,tuple(params),dv,v2_tilde))
+        sol_list.append(v2)
+        v0 = np.copy(v1)
+        v1 = np.copy(v2)
+    fig =plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(param_list,plot_list)
     plt.show()

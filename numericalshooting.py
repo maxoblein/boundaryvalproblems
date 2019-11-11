@@ -129,7 +129,9 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
         v0 = np.copy(v1)
         v1 = np.copy(v2)
 
-    fig =plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(param_list,plot_list)
-    plt.show()
+    if plot == True:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(param_list,plot_list)
+        plt.show()
+    return np.array(param_list), np.array(sol_list)

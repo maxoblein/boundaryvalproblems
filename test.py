@@ -64,4 +64,4 @@ if __name__ == '__main__':
 
     params = np.array([-1,[2,-2]])
     #natural_continuation([0.3,0,6.3],params,odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)
-    pseudo_continuation([0.3,0,6.3],params,odefuncHOPFMOD,vary_param=1,discretisation = shooting)
+    pseudo_continuation([0.3,0,6.3],params,odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot = True)

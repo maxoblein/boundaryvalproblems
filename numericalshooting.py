@@ -28,7 +28,7 @@ def sol_after_given_period(X0_T,f,parameters):
     return sol_array[-1,:]
 
 
-def constraints(X0_T,f,parameters):
+def constraints(v,f,params,dv = None,v_tilde = None,vary_param = None,pseudo = False):
     '''
     function that implements the constraints on the ode
 
@@ -40,30 +40,54 @@ def constraints(X0_T,f,parameters):
     outputs: -phi constraints to be made to zero
     '''
 
+    if pseudo == False:
+        phi = (v[0:-1] - sol_after_given_period(v,f,params))
+        t = 0
 
-    phi = (X0_T[0:-1] - sol_after_given_period(X0_T,f,parameters))
-    t = 0
-
-    phi = np.hstack((phi,f(X0_T[:-1],t,*parameters)[0]))
-
+        phi = np.hstack((phi,f(v[:-1],t,*params)[0]))
+    if pseudo == True:
+        params = np.delete(params,vary_param)
+        params = np.insert(params,vary_param,v[-1])
+        params = tuple(params)
+        phi = v[:-2] - sol_after_given_period(v[:-1],f,params)
+        t = 0
+        phi = np.hstack((phi,f(v[:-2],t,*params)[0]))
+        phi = np.hstack((phi,np.dot(v-v_tilde,dv)))
     return phi
 
-def constraints_cont(v,f,params,dv,v_tilde,vary_param):
-    params = np.delete(params,vary_param)
-    params = np.insert(params,vary_param,v[-1])
-    params = tuple(params)
-    phi = v[:-2] - sol_after_given_period(v[:-1],f,params)
-    t = 0
-    phi = np.hstack((phi,f(v[:-2],t,*params)[0]))
-    phi = np.hstack((phi,np.dot(v-v_tilde,dv)))
-    return phi
+
 
 
 def shooting(odefunc,parameters,X0_T):
+    '''
+    function that implements the numerical shooting method
+
+    inputs:
+            -odefunc ode Function
+            -parameters for ode
+            --X0_T array of initial conditions and guess at period
+
+    outputs: -array of correct initial conditions and timeperiod
+    '''
     solution = fsolve(constraints,X0_T,(odefunc,parameters))
     return(solution)
 
 def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):
+    '''
+    function that implements natural parameter continuation
+
+    inputs:
+            -u0 initial state variables and period ndarray
+            -params parameters of sysystem one is a list to be varied ndarray
+            -odefunc ode to be analysed
+            -vary_param index of parameter to vary default 0
+            -steps number of steps default 100
+            -discretisation type of method to use e.g. shooting default is none
+            -plot option to show plot default no plot
+
+    outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
+    '''
+
     pspan = params[vary_param]
     delta = (pspan[1] - pspan[0])/steps
     p0 = pspan[0]
@@ -84,7 +108,8 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
             mag_list.append(np.linalg.norm(i))
         plot_list.append(max(mag_list))
         param_list.append(params[vary_param])
-        sol_list.append(u0)
+        sol = np.append(u0,params[vary_param])
+        sol_list.append(sol)
         u0_tilde = np.copy(u0)
         params[vary_param] += delta
     if plot == True:
@@ -92,9 +117,24 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
         ax = fig.add_subplot(111)
         ax.plot(param_list,plot_list)
         plt.show()
-    return np.array(param_list), np.array(sol_list)
+    return np.array(sol_list)
 
 def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False):
+    '''
+    function that implements pseudo arclength parameter continuation
+
+    inputs:
+            -u0 initial state variables and period ndarray
+            -params parameters of sysystem one is a list to be varied ndarray
+            -odefunc ode to be analysed
+            -vary_param index of parameter to vary default 0
+            -steps number of steps default 100
+            -discretisation type of method to use e.g. shooting default is none
+            -plot option to show plot default no plot
+
+    outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
+    '''
+
     pspan = params[vary_param]
     delta = (pspan[1] - pspan[0])/steps
     p0 = pspan[0]
@@ -115,7 +155,7 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
         v2_tilde = v1 + dv
         params = np.delete(params,vary_param)
         params = np.insert(params,vary_param,v2_tilde[-1])
-        v2 = fsolve(constraints_cont,v2_tilde,(odefunc,params,dv,v2_tilde,vary_param))
+        v2 = fsolve(constraints,v2_tilde,(odefunc,params,dv,v2_tilde,vary_param, True))
         params = np.delete(params,vary_param)
         params = np.insert(params,vary_param,v2[-1])
         tspan = np.linspace(0,v2[-2])
@@ -134,4 +174,4 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
         ax = fig.add_subplot(111)
         ax.plot(param_list,plot_list)
         plt.show()
-    return np.array(param_list), np.array(sol_list)
+    return np.array(sol_list)

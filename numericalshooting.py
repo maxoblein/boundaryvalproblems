@@ -10,7 +10,7 @@ def sol_after_given_period(v,f,params):
     '''given a set of initial conditions and a Time guessed to be the period
     calculate the solution a this time
 
-    inputs: -X0_T array of initial guess conditions for x,y, and period
+    inputs: -v ndarray of initial guess conditions for x,y, and period
             -f the function of the ode being analysed
             -t timeperiod to be integrated through
             -parameters of the ode
@@ -32,7 +32,7 @@ def constraints(v,f,params,dv = None,v_tilde = None,vary_param = None,pseudo = F
     '''
     function that implements the constraints on the ode
 
-    inputs: -X0_T array of initial conditions and guess at period
+    inputs: -v ndarray of initial conditions and guess at period
             -f ode Function
             -t timespan
             -parameters for ode

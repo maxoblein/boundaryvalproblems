@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from decimal import Decimal
 
-def sol_after_given_period(X0_T,f,parameters):
+def sol_after_given_period(v,f,params):
     '''given a set of initial conditions and a Time guessed to be the period
     calculate the solution a this time
 
@@ -19,10 +19,10 @@ def sol_after_given_period(X0_T,f,parameters):
 
     '''
 
-    X0 = X0_T[0:-1]
-    period = X0_T[-1]
+    X0 = v[0:-1]
+    period = v[-1]
     t = np.linspace(0,period)
-    sol_array = odeint(f,X0,t,args = parameters)
+    sol_array = odeint(f,X0,t,args = params)
 
 
     return sol_array[-1,:]
@@ -58,7 +58,7 @@ def constraints(v,f,params,dv = None,v_tilde = None,vary_param = None,pseudo = F
 
 
 
-def shooting(odefunc,parameters,X0_T):
+def shooting(odefunc,params,v):
     '''
     function that implements the numerical shooting method
 
@@ -69,7 +69,7 @@ def shooting(odefunc,parameters,X0_T):
 
     outputs: -array of correct initial conditions and timeperiod
     '''
-    solution = fsolve(constraints,X0_T,(odefunc,parameters))
+    solution = fsolve(constraints,v,(odefunc,params))
     return(solution)
 
 def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):

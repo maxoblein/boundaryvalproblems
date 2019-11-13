@@ -29,7 +29,7 @@ def odefuncPP(X,t,a,b,d):
     dXdt = [dx,dy]
     return np.array(dXdt)
 
-def cubic(X,t,c):
+def cubic(X,c):
     return  X**3 - X + c
 
 def HOPFanalytic(beta,t):
@@ -49,6 +49,7 @@ if __name__ == '__main__':
         print('Test failed')
 
 
-    params = np.array([-1,[2,-1]])
-    #sol = natural_continuation([0.4,0.4,20],params,odefuncPP,vary_param=1,discretisation = shooting,plot = True)
-    sol = pseudo_continuation([0.3,0,6.3],params,cubic,vary_param=1,discretisation = shooting,plot = True)
+    params = np.array([-1,[2,0]])
+    sol = natural_continuation([0.3,0,6.3],params,odefuncHOPF,vary_param=1,discretisation = shooting,plot = True)
+    #sol = pseudo_continuation([-1],params,cubic)
+    pseudo_continuation([0.3,0,6.3],np.array([-1,[2,-1]]),odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)

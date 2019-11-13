@@ -72,6 +72,18 @@ def shooting(odefunc,params,v):
     solution = fsolve(constraints,v,(odefunc,params))
     return(solution)
 
+def check_input(u0,odefunc,params,vary_param):
+    pspan = params[vary_param]
+    p0 = pspan[0]
+
+    params = np.delete(params,vary_param)
+    params = np.insert(params,vary_param,p0)
+    output = odefunc(u0,0,*tuple(params))
+    if len(u0)-1 == len(output):
+        return None
+    else:
+        return 1
+
 def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):
     '''
     function that implements natural parameter continuation
@@ -87,36 +99,62 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
 
     outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
     '''
-
-    pspan = params[vary_param]
-    delta = (pspan[1] - pspan[0])/steps
-    p0 = pspan[0]
-
-    params = np.delete(params,vary_param)
-    params = np.insert(params,vary_param,p0)
-
-    u0_tilde = u0
+    if check_input(u0,odefunc,params,vary_param) == 1:
+        print('Incorrect u0 dimensions')
+        return False
     param_list = []
     plot_list = []
     sol_list = []
-    for i in range(steps):
-        u0 = discretisation(odefunc,tuple(params),u0_tilde)
-        tspan = np.linspace(0,u0_tilde[-1])
-        sol_array = odeint(odefunc,u0_tilde[:-1],tspan,args = tuple(params))
-        mag_list = []
-        for i in sol_array:
-            mag_list.append(np.linalg.norm(i))
-        plot_list.append(max(mag_list))
-        param_list.append(params[vary_param])
-        sol = np.append(u0,params[vary_param])
-        sol_list.append(sol)
-        u0_tilde = np.copy(u0)
-        params[vary_param] += delta
-    if plot == True:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot(param_list,plot_list)
-        plt.show()
+    if discretisation.__name__ == 'shooting':
+        pspan = params[vary_param]
+        delta = (pspan[1] - pspan[0])/steps
+        p0 = pspan[0]
+
+        params = np.delete(params,vary_param)
+        params = np.insert(params,vary_param,p0)
+
+        u0_tilde = u0
+
+        for i in range(steps):
+            u0 = discretisation(odefunc,tuple(params),u0_tilde)
+            tspan = np.linspace(0,u0[-1])
+            sol_array = odeint(odefunc,u0[:-1],tspan,args = tuple(params))
+            mag_list = []
+            for i in sol_array:
+                mag_list.append(np.linalg.norm(i))
+            plot_list.append(max(mag_list))
+            param_list.append(params[vary_param])
+            sol = np.append(u0,params[vary_param])
+            sol_list.append(sol)
+            u0_tilde = np.copy(u0)
+            params[vary_param] += delta
+        if plot == True:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(param_list,plot_list)
+            plt.show()
+
+    elif discretisation.__name__ == '<lambda>':
+        pspan = params[vary_param]
+        delta = (pspan[1] - pspan[0])/steps
+        p0 = pspan[0]
+        params = np.delete(params,vary_param,axis = 0)
+        for i in range(steps):
+            params = np.insert(params,vary_param,float(p0))
+            sol = fsolve(odefunc,u0,args = (tuple(params)))
+            param_list.append(p0)
+            plot_list.append(sol)
+            sol_list.append(sol)
+            sol_list.append(params[vary_param])
+            params = np.delete(params,vary_param)
+            u0 = sol
+            p0 += delta
+        if plot == True:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(param_list,plot_list)
+            plt.show()
+
     return np.array(sol_list)
 
 def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False):
@@ -134,44 +172,74 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
 
     outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
     '''
-
-    pspan = params[vary_param]
-    delta = (pspan[1] - pspan[0])/steps
-    p0 = pspan[0]
-    params = np.delete(params,vary_param)
-    params = np.insert(params,vary_param,p0)
-    u0 = discretisation(odefunc,tuple(params),u0)
-    p1 = p0 + delta
-    params = np.delete(params,vary_param)
-    params = np.insert(params,vary_param,p1)
-    u1 = discretisation(odefunc,tuple(params),u0)
-    v0 = np.hstack((u0,p0))
-    v1 = np.hstack((u1,p1))
+    if check_input(u0,odefunc,params,vary_param) == 1:
+        print('Incorrect u0 dimensions')
+        return False
     param_list = []
     plot_list = []
-    sol_list = [v0,v1]
-    for i in range(steps-1):
-        dv = v1 - v0
-        v2_tilde = v1 + dv
+    sol_list = []
+    print(discretisation.__name__ == 'shooting')
+    if discretisation.__name__ == 'shooting':
+        pspan = params[vary_param]
+        delta = (pspan[1] - pspan[0])/steps
+        p0 = pspan[0]
         params = np.delete(params,vary_param)
-        params = np.insert(params,vary_param,v2_tilde[-1])
-        v2 = fsolve(constraints,v2_tilde,(odefunc,params,dv,v2_tilde,vary_param, True))
+        params = np.insert(params,vary_param,p0)
+        u0 = discretisation(odefunc,tuple(params),u0)
+        p1 = p0 + delta
         params = np.delete(params,vary_param)
-        params = np.insert(params,vary_param,v2[-1])
-        tspan = np.linspace(0,v2[-2])
-        sol_array = odeint(odefunc,v2[:-2],tspan,args = tuple(params))
-        mag_list = []
-        for j in sol_array:
-            mag_list.append(np.linalg.norm(j))
-        plot_list.append(max(mag_list))
-        param_list.append(params[vary_param])
-        sol_list.append(v2)
-        v0 = np.copy(v1)
-        v1 = np.copy(v2)
+        params = np.insert(params,vary_param,p1)
+        u1 = discretisation(odefunc,tuple(params),u0)
+        v0 = np.hstack((u0,p0))
+        v1 = np.hstack((u1,p1))
+        sol_list.append(v0)
+        sol_list.append(v1)
+        for i in range(steps-1):
+            dv = v1 - v0
+            v2_tilde = v1 + dv
+            params = np.delete(params,vary_param)
+            params = np.insert(params,vary_param,v2_tilde[-1])
+            v2 = fsolve(constraints,v2_tilde,(odefunc,params,dv,v2_tilde,vary_param, True))
+            params = np.delete(params,vary_param)
+            params = np.insert(params,vary_param,v2[-1])
+            tspan = np.linspace(0,v2[-2])
+            sol_array = odeint(odefunc,v2[:-2],tspan,args = tuple(params))
+            mag_list = []
+            for j in sol_array:
+                mag_list.append(np.linalg.norm(j))
+            plot_list.append(max(mag_list))
+            param_list.append(params[vary_param])
+            sol_list.append(v2)
+            v0 = np.copy(v1)
+            v1 = np.copy(v2)
 
-    if plot == True:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot(param_list,plot_list)
-        plt.show()
+        if plot == True:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(param_list,plot_list)
+            plt.show()
+
+    elif discretisation.__name__ == '<lambda>':
+        pspan = params[vary_param]
+        delta = (pspan[1] - pspan[0])/steps
+        p0 = pspan[0]
+        params = np.delete(params,vary_param,axis = 0)
+        for i in range(steps):
+            params = np.insert(params,vary_param,float(p0))
+            sol = fsolve(odefunc,u0,args = (tuple(params)))
+            param_list.append(p0)
+            plot_list.append(sol)
+            sol_list.append(sol)
+            sol_list.append(params[vary_param])
+            params = np.delete(params,vary_param)
+            u0 = sol
+            p0 += delta
+
+
+
+        if plot == True:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(param_list,plot_list)
+            plt.show()
     return np.array(sol_list)

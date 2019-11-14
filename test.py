@@ -67,10 +67,20 @@ def test_natural_continuation_otuput():
     return None
 
 def test_incorrect_dimensions():
-    if natural_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting) == False:
-        print('Incorrect input test passed')
+    natout = natural_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    pseudoout = pseudo_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    if np.logical_and(natout == False,pseudoout == False):
+        print('Incorrect input u0 test passed')
     else:
-        print('Incorrect input test failed')
+        print('Incorrect input u0 test failed')
+
+def test_correct_vary_param():
+    natout = natural_continuation([0.3,0,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=0,discretisation = shooting)
+    pseudoout = pseudo_continuation([0.3,0,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=0,discretisation = shooting)
+    if np.logical_and(natout == False,pseudoout == False):
+        print('Incorrect input vary_param test passed')
+    else:
+        print('Incorrect input vary_param test failed')
 
 #shooting(odefunc,phasecond,parameters,X0_T)
 if __name__ == '__main__':
@@ -78,3 +88,4 @@ if __name__ == '__main__':
     test_shooting_output()
     test_natural_continuation_otuput()
     test_incorrect_dimensions()
+    test_correct_vary_param()

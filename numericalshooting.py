@@ -2,8 +2,11 @@ import sys
 from scipy.integrate import odeint
 import scipy.signal as signal
 from scipy.optimize import fsolve
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
 
 def sol_after_given_period(v,f,params):
     '''given a set of initial conditions and a Time guessed to be the period
@@ -73,15 +76,21 @@ def shooting(odefunc,params,v):
 
 def check_input(u0,odefunc,params,vary_param):
     pspan = params[vary_param]
-    p0 = pspan[0]
-
-    params = np.delete(params,vary_param)
-    params = np.insert(params,vary_param,p0)
-    output = odefunc(u0,0,*tuple(params))
-    if len(u0)-1 == len(output):
-        return None
-    else:
+    if np.size(params[vary_param]) != 2:
+        sys.stderr.write('Incorrect index vary_param\n')
         return 1
+    else:
+        p0 = pspan[0]
+
+        params = np.delete(params,vary_param)
+        params = np.insert(params,vary_param,p0)
+        output = odefunc(u0,0,*tuple(params))
+        if len(u0)-1 == len(output):
+            return None
+        else:
+            sys.stderr.write('Incorrect u0 dimensions\n')
+            return 1
+
 
 def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):
     '''
@@ -99,8 +108,8 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
     outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
     '''
     if check_input(u0,odefunc,params,vary_param) == 1:
-        print('Incorrect u0 dimensions')
         return False
+
     param_list = []
     plot_list = []
     sol_list = []
@@ -178,12 +187,10 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
     outputs: -ndarray of state variables, timeperiod and parameter values at each parameter step
     '''
     if check_input(u0,odefunc,params,vary_param) == 1:
-        print('Incorrect u0 dimensions')
         return False
     param_list = []
     plot_list = []
     sol_list = []
-    print(discretisation.__name__ == 'shooting')
     if discretisation.__name__ == 'shooting':
         pspan = params[vary_param]
         delta = (pspan[1] - pspan[0])/steps

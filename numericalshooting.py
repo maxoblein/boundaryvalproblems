@@ -4,7 +4,6 @@ import scipy.signal as signal
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 import numpy as np
-from decimal import Decimal
 
 def sol_after_given_period(v,f,params):
     '''given a set of initial conditions and a Time guessed to be the period
@@ -132,6 +131,9 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.plot(param_list,plot_list)
+            ax.set_xlabel('Bifucation parameter',fontsize = 14)
+            ax.set_ylabel(r'$|u|$',fontsize=14)
+            ax.set_title('Branch of limit cycles',fontsize=16)
             plt.show()
 
     elif discretisation.__name__ == '<lambda>':
@@ -153,6 +155,9 @@ def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretis
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.plot(param_list,plot_list)
+            ax.set_xlabel('Bifucation parameter',fontsize = 14)
+            ax.set_ylabel(r'$|u|$',fontsize=14)
+            ax.set_title('Branch of limit cycles',fontsize=16)
             plt.show()
 
     return np.array(sol_list)
@@ -217,6 +222,9 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.plot(param_list,plot_list)
+            ax.set_xlabel('Bifucation parameter',fontsize = 14)
+            ax.set_ylabel(r'$|u|$',fontsize=14)
+            ax.set_title('Branch of limit cycles',fontsize=16)
             plt.show()
 
     elif discretisation.__name__ == '<lambda>':
@@ -241,5 +249,8 @@ def pseudo_continuation(u0,params,odefunc,vary_param = 0,steps = 100,discretisat
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.plot(param_list,plot_list)
+            ax.set_xlabel('Bifucation parameter',fontsize = 14)
+            ax.set_ylabel(r'$|u|$',fontsize=14)
+            ax.set_title('Branch of limit cycles',fontsize=16)
             plt.show()
     return np.array(sol_list)

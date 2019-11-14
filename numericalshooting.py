@@ -29,7 +29,6 @@ def sol_after_given_period(v,f,params):
 
     return sol_array[-1,:]
 
-
 def constraints(v,f,params,dv = None,v_tilde = None,vary_param = None,pseudo = False):
     '''
     function that implements the constraints on the ode
@@ -56,9 +55,6 @@ def constraints(v,f,params,dv = None,v_tilde = None,vary_param = None,pseudo = F
         phi = np.hstack((phi,f(v[:-2],t,*params)[0]))
         phi = np.hstack((phi,np.dot(v-v_tilde,dv)))
     return phi
-
-
-
 
 def shooting(odefunc,params,v):
     '''
@@ -90,7 +86,6 @@ def check_input(u0,odefunc,params,vary_param):
         else:
             sys.stderr.write('Incorrect u0 dimensions\n')
             return 1
-
 
 def natural_continuation(u0,params,odefunc,vary_param = 0,steps = 100, discretisation = lambda odefunc,parameters,X0_T : X0_T,plot = False ):
     '''

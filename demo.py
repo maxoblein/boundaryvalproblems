@@ -19,24 +19,6 @@ def odefuncHOPFMOD(X,t,alpha,beta):
     dXdt = [du1,du2]
     return np.array(dXdt)
 
-def odefuncPP(X,t,a,b,d):
-    '''
-        function to implement ode for predator prey system
-
-    '''
-    X.tolist()
-    dx = X[0]*(1-X[0]) - ((a*X[0]*X[1])/(d+X[0]))
-    dy = b * X[1] * (1 - (X[1]/X[0]))
-    dXdt = [dx,dy]
-    return np.array(dXdt)
-
-def cubic(X,c):
-    return  X**3 - X + c
-
-def HOPFanalytic(beta,t):
-    u1 = np.sqrt(beta) * np.cos(t)
-    u2 = np.sqrt(beta) * np.sin(t)
-    return[u1,u2]
 #shooting(odefunc,phasecond,parameters,X0_T)
 if __name__ == '__main__':
 

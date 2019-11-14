@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+import sys
 from numericalshooting import *
 
 def odefuncHOPF(X,t,alpha,beta):
@@ -39,17 +40,8 @@ def HOPFanalytic(beta,t):
 #shooting(odefunc,phasecond,parameters,X0_T)
 if __name__ == '__main__':
 
-    parameters = (-1,0.1)
-    X0_T = [0.3,0,6.28]
-    solution = shooting(odefuncHOPF,parameters,X0_T)
-    analytic_sol = HOPFanalytic(parameters[1],solution[2])
-    if np.isclose(solution[0:-1],analytic_sol,atol = 1e-5).all() == True:
-        print('Test passed')
-    else:
-        print('Test failed')
-
-
-    params = np.array([-1,[2,0]])
-    #sol = natural_continuation([0.3,0,6.3],params,odefuncHOPF,vary_param=1,discretisation = shooting,plot = True)
-    #sol = pseudo_continuation([-1],params,cubic)
-    pseudo_continuation([0.3,0,6.3],np.array([-1,[2,-1]]),odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)
+    if sys.argv[1] == 'natural':
+        params = np.array([-1,[2,0]])
+        sol = natural_continuation([0.3,0,6.3],params,odefuncHOPF,vary_param=1,discretisation = shooting,plot = True)
+    if sys.argv[1] == 'pseudo':
+        pseudo_continuation([0.3,0,6.3],np.array([-1,[2,-1]]),odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)

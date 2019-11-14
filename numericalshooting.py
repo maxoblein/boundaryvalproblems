@@ -71,6 +71,16 @@ def shooting(odefunc,params,v):
     return(solution)
 
 def check_input(u0,odefunc,params,vary_param):
+    '''checks that the inputs to a function are correct
+
+    inputs: -u0 ndarray of initial conditions
+            -odefunc system of odes
+            -params ndarray of parameters
+            -vary_param integer index of paramter to vary
+    return: -0 if correct input sizes
+            -1 if incorrect input sizes
+
+    '''
     pspan = params[vary_param]
     if np.size(params[vary_param]) != 2:
         sys.stderr.write('Incorrect index vary_param\n')
@@ -82,7 +92,7 @@ def check_input(u0,odefunc,params,vary_param):
         params = np.insert(params,vary_param,p0)
         output = odefunc(u0,0,*tuple(params))
         if len(u0)-1 == len(output):
-            return None
+            return 0
         else:
             sys.stderr.write('Incorrect u0 dimensions\n')
             return 1

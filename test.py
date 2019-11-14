@@ -67,9 +67,11 @@ def test_natural_continuation_otuput():
     return None
 
 def test_incorrect_dimensions():
-    natout = natural_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
-    pseudoout = pseudo_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
-    if np.logical_and(natout == False,pseudoout == False):
+    natoutshort = natural_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    pseudooutshort = pseudo_continuation([0.3,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    natoutlong = natural_continuation([0.3,0,0.1,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    pseudooutlong = pseudo_continuation([0.3,0,0.1,6.3],np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting)
+    if np.logical_and(np.logical_and(natoutshort == False,pseudooutshort == False),np.logical_and(natoutlong == False,pseudooutlong == False)):
         print('Incorrect input u0 test passed')
     else:
         print('Incorrect input u0 test failed')

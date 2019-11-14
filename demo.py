@@ -23,7 +23,6 @@ def odefuncHOPFMOD(X,t,alpha,beta):
 if __name__ == '__main__':
 
     if sys.argv[1] == 'natural':
-        params = np.array([-1,[2,0]])
-        sol = natural_continuation([0.3,0,6.3],params,odefuncHOPF,vary_param=1,discretisation = shooting,plot = True)
+        sol = natural_continuation([0.3,0,6.3], np.array([-1,[2,0]]),odefuncHOPF,vary_param=1,discretisation = shooting,plot = True)
     if sys.argv[1] == 'pseudo':
         pseudo_continuation([0.3,0,6.3],np.array([-1,[2,-1]]),odefuncHOPFMOD,vary_param=1,discretisation = shooting,plot =True)
